@@ -70,6 +70,7 @@ public extension Disk {
     /// - Returns: URL location writing image
     /// - Throws: Error if there were any issues writing the image to disk
     @discardableResult static func append(_ value: UIImage, to path: String, in directory: Directory) throws -> URL? {
+        var imageUrl: URL?
         do {
             if let folderUrl = try? getExistingFileURL(for: path, in: directory) {
                 let fileUrls = try FileManager.default.contentsOfDirectory(at: folderUrl, includingPropertiesForKeys: nil, options: [])
@@ -99,9 +100,8 @@ public extension Disk {
                         recoverySuggestion: "Make sure image is not corrupt."
                     )
                 }
-                let imageUrl = folderUrl.appendingPathComponent(imageName, isDirectory: false)
-                try imageData.write(to: imageUrl, options: .atomic)
-                return imageUrl
+                imageUrl = folderUrl.appendingPathComponent(imageName, isDirectory: false)
+                try imageData.write(to: imageUrl!, options: .atomic)
             } else {
                 let array = [value]
                 try save(array, to: directory, as: path)
@@ -109,7 +109,7 @@ public extension Disk {
         } catch {
             throw error
         }
-        return nil
+        return imageUrl
     }
     
     /// Append an array of images to a folder
