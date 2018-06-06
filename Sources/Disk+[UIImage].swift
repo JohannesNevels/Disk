@@ -67,8 +67,9 @@ public extension Disk {
     ///   - value: image to store to disk
     ///   - path: folder location to store the image (i.e. "Folder/")
     ///   - directory: user directory to store the image file in
+    /// - Returns: URL location writing image
     /// - Throws: Error if there were any issues writing the image to disk
-    static func append(_ value: UIImage, to path: String, in directory: Directory) throws {
+    @discardableResult static func append(_ value: UIImage, to path: String, in directory: Directory) throws -> URL? {
         do {
             if let folderUrl = try? getExistingFileURL(for: path, in: directory) {
                 let fileUrls = try FileManager.default.contentsOfDirectory(at: folderUrl, includingPropertiesForKeys: nil, options: [])
@@ -100,6 +101,7 @@ public extension Disk {
                 }
                 let imageUrl = folderUrl.appendingPathComponent(imageName, isDirectory: false)
                 try imageData.write(to: imageUrl, options: .atomic)
+                return imageUrl
             } else {
                 let array = [value]
                 try save(array, to: directory, as: path)
@@ -107,6 +109,7 @@ public extension Disk {
         } catch {
             throw error
         }
+        return nil
     }
     
     /// Append an array of images to a folder
@@ -115,6 +118,7 @@ public extension Disk {
     ///   - value: images to store to disk
     ///   - path: folder location to store the images (i.e. "Folder/")
     ///   - directory: user directory to store the images in
+    /// - Returns: URL location writing image
     /// - Throws: Error if there were any issues writing the images to disk
     static func append(_ value: [UIImage], to path: String, in directory: Directory) throws {
         do {
