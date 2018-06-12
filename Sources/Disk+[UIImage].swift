@@ -29,8 +29,9 @@ public extension Disk {
     ///   - value: array of images to store
     ///   - directory: user directory to store the images in
     ///   - path: folder location to store the images (i.e. "Folder/")
+    /// - Returns: URL location writing image
     /// - Throws: Error if there were any issues creating a folder and writing the given images to it
-    static func save(_ value: [UIImage], to directory: Directory, as path: String) throws {
+    static func save(_ value: [UIImage], to directory: Directory, as path: String) throws -> URL? {
         do {
             let folderUrl = try createURL(for: path, in: directory)
             try createSubfoldersBeforeCreatingFile(at: folderUrl)
@@ -55,10 +56,12 @@ public extension Disk {
                 }
                 let imageUrl = folderUrl.appendingPathComponent(imageName, isDirectory: false)
                 try imageData.write(to: imageUrl, options: .atomic)
+                return imageUrl
             }
         } catch {
             throw error
         }
+        return nil
     }
     
     /// Append an image to a folder
@@ -70,7 +73,6 @@ public extension Disk {
     /// - Returns: URL location writing image
     /// - Throws: Error if there were any issues writing the image to disk
     @discardableResult static func append(_ value: UIImage, to path: String, in directory: Directory) throws -> URL? {
-        var imageUrl: URL?
         do {
             if let folderUrl = try? getExistingFileURL(for: path, in: directory) {
                 let fileUrls = try FileManager.default.contentsOfDirectory(at: folderUrl, includingPropertiesForKeys: nil, options: [])
@@ -100,16 +102,16 @@ public extension Disk {
                         recoverySuggestion: "Make sure image is not corrupt."
                     )
                 }
-                imageUrl = folderUrl.appendingPathComponent(imageName, isDirectory: false)
-                try imageData.write(to: imageUrl!, options: .atomic)
+                let imageUrl = folderUrl.appendingPathComponent(imageName, isDirectory: false)
+                try imageData.write(to: imageUrl, options: .atomic)
+                return imageUrl
             } else {
                 let array = [value]
-                try save(array, to: directory, as: path)
+                return try save(array, to: directory, as: path)
             }
         } catch {
             throw error
         }
-        return imageUrl
     }
     
     /// Append an array of images to a folder
